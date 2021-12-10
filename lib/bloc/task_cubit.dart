@@ -16,10 +16,6 @@ class TaskCubit extends Cubit<TaskStates> {
 
   List<Task> tasksList = [];
 
-  List<Task> get tasks{
-    return tasksList;
-  }
-
 
 
   TextEditingController titleTextController = TextEditingController();

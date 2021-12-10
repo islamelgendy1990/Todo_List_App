@@ -34,7 +34,7 @@ class HomePage extends StatelessWidget {
                         Text('Todo List', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold),),
                       ],
                     ),
-                    const Text('4 Tasks', style: TextStyle(
+                     Text('${cubit.tasksList.length.toInt()} Tasks', style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                     ),
@@ -52,6 +52,7 @@ class HomePage extends StatelessWidget {
                             itemCount: cubit.tasksList.length,
                             itemBuilder: (context, index) {
                               return Container(
+                                key: key,
                                 child: Padding(padding: const EdgeInsets.only(right: 5, left: 5, top: 5),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -150,18 +151,29 @@ void _showDialog(BuildContext context) {
               ),
             ),
           ),
-          FlatButton(
-            child: const Text("Add"),
-            onPressed: () {
-              cubit.addTitleTasksList();
-              cubit.titleTextController.clear();
-              cubit.descriptionTextController.clear();
-              CashHelper.saveData(key: "tasksList", value: cubit.tasksList);
-              Navigator.pop(context);
-            },
+          Row(
+            children: [
+              MaterialButton(
+                child: const Text("Add"),
+                onPressed: () {
+                  cubit.addTitleTasksList();
+                  cubit.titleTextController.clear();
+                  cubit.descriptionTextController.clear();
+                  CashHelper.saveData(key: "tasksList", value: cubit.tasksList);
+                  Navigator.pop(context);
+                },
+              ),
+              MaterialButton(
+                child: const Text("Cancel"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
         ],
       );
     },
+    barrierDismissible: false,
   );
 }
