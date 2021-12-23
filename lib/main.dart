@@ -1,16 +1,19 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_list_app/network/chash_helper.dart';
 import 'package:todo_list_app/ui/home_page.dart';
 
-void main() async {
+import 'network/bloc_observer.dart';
 
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
 
-  await CashHelper.init();
+  BlocOverrides.runZoned(() {
+    runApp(const MyApp());
+  },
+    blocObserver: MyBlocObserver(),
+  );
 
-  CashHelper.getData(key: "tasksList");
 
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

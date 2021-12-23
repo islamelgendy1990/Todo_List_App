@@ -1,16 +1,22 @@
+
+
 class Task {
-
-  final String title ;
-  final String description ;
-
+  String? title;
+  String? description;
 
   Task({
-    required this.title,
-    required this.description,
+    this.title,
+    this.description,
   });
 
+  Task.fromMap(Map map) :
+        this.title = map['title'],
+        this.description = map['description'];
 
-
-
-
+  Map toMap(){
+    return {
+      'title': this.title,
+      'description': this.description,
+    };
+  }
 }

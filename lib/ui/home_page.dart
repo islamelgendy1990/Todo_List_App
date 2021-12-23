@@ -2,22 +2,28 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list_app/bloc/task_cubit.dart';
-import 'package:todo_list_app/network/chash_helper.dart';
+import 'package:todo_list_app/models/task.dart';
 import 'package:todo_list_app/states/task_states.dart';
 
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
+
+
+
   @override
   Widget build(BuildContext context) {
+
+
     return BlocProvider(
-      create: (BuildContext context) => TaskCubit(),
+      create: (BuildContext context) => TaskCubit()..createDatabase(),
       child: BlocConsumer<TaskCubit, TaskStates>(
         listener: (BuildContext context, state){},
         builder: (BuildContext context, state){
 
           var cubit = TaskCubit.get(context);
+
 
           return Scaffold(
             backgroundColor: Colors.teal[400],
@@ -61,29 +67,27 @@ class HomePage extends StatelessWidget {
                                       const SizedBox(height: 5,),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 5, right: 5),
-                                        child: Container(
+                                        child: Card(
                                           child: ListTile(
                                             title: Text(
-                                              cubit.tasksList[index].title,
+                                              cubit.tasksList[index].title.toString(),
                                               maxLines: 3,
                                               style: const TextStyle(fontSize: 15),
                                             ),
                                             subtitle: Text(
-                                              cubit.tasksList[index].description,
+                                              cubit.tasksList[index].description.toString(),
                                               maxLines: 6,
                                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                                             ),
                                             trailing: IconButton(
                                                 onPressed: (){
-                                                  cubit.deleteTasksList(index);
+                                                 // cubit.deleteTasksList(index);
                                                 },
                                                 icon: const Icon(Icons.delete, color: Colors.red,)
                                             ),
                                           ),
-                                          decoration: BoxDecoration(
-                                              color: Colors.black12,
-                                              borderRadius: BorderRadius.circular(17)
-                                          ),
+                                          color: Colors.teal[50],
+                                          elevation: 3,
                                         ),
                                       ),
                                       const SizedBox(height: 5,),
@@ -120,6 +124,10 @@ void _showDialog(BuildContext context) {
 
   var cubit = TaskCubit.get(context);
 
+
+  TextEditingController titleTextController = TextEditingController();
+  TextEditingController descriptionTextController = TextEditingController();
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -129,7 +137,7 @@ void _showDialog(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
-              controller: cubit.titleTextController,
+              controller: titleTextController,
               decoration: const InputDecoration(
                   labelText: "Add title Tasks",
                   border: OutlineInputBorder(
@@ -142,7 +150,7 @@ void _showDialog(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
-              controller: cubit.descriptionTextController,
+              controller: descriptionTextController,
               decoration: const InputDecoration(
                   labelText: "Add description Tasks",
                   border: OutlineInputBorder(
@@ -154,17 +162,17 @@ void _showDialog(BuildContext context) {
           Row(
             children: [
               MaterialButton(
-                child: const Text("Add"),
+                child: const Text("Add", style: TextStyle(color: Colors.blue),),
                 onPressed: () {
-                  cubit.addTitleTasksList();
-                  cubit.titleTextController.clear();
-                  cubit.descriptionTextController.clear();
-                  CashHelper.saveData(key: "tasksList", value: cubit.tasksList);
+                  cubit.insertToDatabase(title: titleTextController.text, description: descriptionTextController.text);
+                  // cubit.getDataFromDatabase(cubit.database);
+                  titleTextController.clear();
+                  descriptionTextController.clear();
                   Navigator.pop(context);
                 },
               ),
               MaterialButton(
-                child: const Text("Cancel"),
+                child: const Text("Cancel", style: TextStyle(color: Colors.red),),
                 onPressed: () {
                   Navigator.pop(context);
                 },
