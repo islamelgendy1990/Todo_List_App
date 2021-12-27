@@ -17,12 +17,14 @@ class HomePage extends StatelessWidget {
 
 
     return BlocProvider(
-      create: (BuildContext context) => TaskCubit()..createDatabase(),
+      create: (BuildContext context) => TaskCubit()..createDataBase(),
       child: BlocConsumer<TaskCubit, TaskStates>(
         listener: (BuildContext context, state){},
         builder: (BuildContext context, state){
 
+
           var cubit = TaskCubit.get(context);
+
 
 
           return Scaffold(
@@ -70,18 +72,19 @@ class HomePage extends StatelessWidget {
                                         child: Card(
                                           child: ListTile(
                                             title: Text(
-                                              cubit.tasksList[index].title.toString(),
+                                              cubit.tasksList[index]['title'].toString(),
                                               maxLines: 3,
                                               style: const TextStyle(fontSize: 15),
                                             ),
                                             subtitle: Text(
-                                              cubit.tasksList[index].description.toString(),
+                                              cubit.tasksList[index]['description'].toString(),
                                               maxLines: 6,
                                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                                             ),
                                             trailing: IconButton(
                                                 onPressed: (){
                                                  // cubit.deleteTasksList(index);
+                                                  cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
                                                 },
                                                 icon: const Icon(Icons.delete, color: Colors.red,)
                                             ),
@@ -120,13 +123,10 @@ class HomePage extends StatelessWidget {
 
 
 
-void _showDialog(BuildContext context) {
+ void _showDialog(BuildContext context) {
 
   var cubit = TaskCubit.get(context);
 
-
-  TextEditingController titleTextController = TextEditingController();
-  TextEditingController descriptionTextController = TextEditingController();
 
   showDialog(
     context: context,
@@ -137,7 +137,7 @@ void _showDialog(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
-              controller: titleTextController,
+              controller: cubit.titleTextController,
               decoration: const InputDecoration(
                   labelText: "Add title Tasks",
                   border: OutlineInputBorder(
@@ -150,7 +150,7 @@ void _showDialog(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
-              controller: descriptionTextController,
+              controller: cubit.descriptionTextController,
               decoration: const InputDecoration(
                   labelText: "Add description Tasks",
                   border: OutlineInputBorder(
@@ -164,10 +164,10 @@ void _showDialog(BuildContext context) {
               MaterialButton(
                 child: const Text("Add", style: TextStyle(color: Colors.blue),),
                 onPressed: () {
-                  cubit.insertToDatabase(title: titleTextController.text, description: descriptionTextController.text);
-                  // cubit.getDataFromDatabase(cubit.database);
-                  titleTextController.clear();
-                  descriptionTextController.clear();
+                  cubit.insertToDataBase(title: cubit.titleTextController.text, description: cubit.descriptionTextController.text);
+                 // cubit.getDataFromDatabase(cubit.database);
+                  cubit.titleTextController.clear();
+                  cubit.descriptionTextController.clear();
                   Navigator.pop(context);
                 },
               ),

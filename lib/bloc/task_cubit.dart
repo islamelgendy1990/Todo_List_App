@@ -2,7 +2,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:todo_list_app/models/task.dart';
 import 'package:todo_list_app/states/task_states.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -16,77 +15,84 @@ class TaskCubit extends Cubit<TaskStates> {
   }
 
 
+  TextEditingController titleTextController = TextEditingController();
+  TextEditingController descriptionTextController = TextEditingController();
 
 
   late Database database;
 
 
-  List<Task> tasksList = [];
+  List<Map> tasksList = [];
+
+   int? id ;
 
 
 
-  void createDatabase ()
-  {
-     openDatabase('demo.db', version: 1, onCreate: (database, version) async
-      {
-        print('database created');
-       await database.execute(
-            'CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, description TEXT)'
-        ).then((value)
-        {
-          print('table created');
+  void createDataBase() async {
+    database = await openDatabase('demo.db', version: 1,
+        onCreate: (database, version) {
+          print('database created');
+          database
+              .execute(
+              'CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, description TEXT)')
+              .then((value) {
+            print('table Created');
+          }).catchError((error) {});
+          emit(CreateDatabaseStates());
+        }, onOpen: (database) {
+          getDataFromDatabase(database);
+          print('database opened');
         });
-      },
-      onOpen: (database) {
-        getDataFromDatabase(database);
-        print('database opened');
-      },
-    ).then((value)
-    {
-      database = value;
-      emit(CreateDatabaseStates());
-    });
   }
 
 
-
-  void insertToDatabase ({
+  void insertToDataBase({
     required String title,
-    required String description
-  }) async
-  {
-    await database.transaction((txn)
-    {
-      return txn.rawInsert(
-          'INSERT INTO tasks(title, description) VALUES("$title", "$description")'
-      ).then((value)
-      {
+    required String description,
+  }) {
+    database.transaction((txn) async {
+      await txn
+          .rawInsert(
+          'INSERT INTO tasks(title, description) VALUES("$title","$description")')
+          .then((value) {
         print('$value inserted successfully');
         emit(InsertDatabaseStates());
-
         getDataFromDatabase(database);
-
-      }).catchError((error){
-        print('Error  ${error.toString()}');
+      }).catchError((error) {
+        print('error is ${error.toString()}');
       });
     });
   }
 
 
-  void getDataFromDatabase(database)
-  {
-    database.rawQuery('SELECT * FROM tasks').then((value)
-    {
-      emit(GetDatabaseStates());
-
-      print(tasksList);
-    });
+  void getDataFromDatabase(database) async {
+    tasksList = await database.rawQuery('SELECT * FROM tasks');
+    emit(GetDatabaseStates());
+    print(tasksList);
   }
 
 
 
+  // void deleteDataFromDatabase({ required int id}) async
+  // {
+  //   database.rawDelete('DELETE FROM tasks WHERE id = ?', [id]).then((value) {
+  //     getDataFromDatabase(database);
+  //     emit(DeleteDatabaseStates());
+  //   });
+  // }
 
 
+
+  void deleteFromDatabase({ required int id,}) async
+  {
+    await database.rawDelete('DELETE FROM tasks WHERE id = ?', [id]).then((value) {
+      print('$value item is deleted from database');
+      emit(DeleteDatabaseStates());
+      getDataFromDatabase(database);
+    }).catchError((onError) {
+      print(onError);
+    });
+  }
 
 
 
