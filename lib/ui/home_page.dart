@@ -55,7 +55,7 @@ class HomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: cubit.tasksList.isEmpty
-                            ? const Center(child: Text('No Groceries in your list.'),)
+                            ?  Center(child: Image.asset("assets/list.jpeg", ),)
                             : ListView.builder(
                             itemCount: cubit.tasksList.length,
                             itemBuilder: (context, index) {
@@ -67,31 +67,84 @@ class HomePage extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       const SizedBox(height: 5,),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 5, right: 5),
-                                        child: Card(
-                                          child: ListTile(
-                                            title: Text(
-                                              cubit.tasksList[index]['title'].toString(),
-                                              maxLines: 3,
-                                              style: const TextStyle(fontSize: 15),
-                                            ),
-                                            subtitle: Text(
-                                              cubit.tasksList[index]['description'].toString(),
-                                              maxLines: 6,
-                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                                            ),
-                                            trailing: IconButton(
-                                                onPressed: (){
-                                                 // cubit.deleteTasksList(index);
-                                                  cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
-                                                },
-                                                icon: const Icon(Icons.delete, color: Colors.red,)
+                                      Dismissible(
+                                          key: Key(cubit.tasksList[index]['id'].toString()),
+                                          onDismissed: (direction)
+                                          {
+                                            if (direction == DismissDirection.startToEnd) {
+                                              cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
+                                            } else {
+                                              cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
+                                            }
+                                          },
+                                        background: Container(
+                                          color: Colors.red,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(15),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: const [
+                                                Icon(Icons.delete, color: Colors.white),
+                                                Text('Move to trash', style: TextStyle(color: Colors.white)),
+                                              ],
                                             ),
                                           ),
-                                          color: Colors.teal[50],
-                                          elevation: 3,
                                         ),
+                                        secondaryBackground: Container(
+                                          color: Colors.red,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(15),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: const [
+                                                Icon(Icons.delete, color: Colors.white),
+                                                Text('Move to trash', style: TextStyle(color: Colors.white)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        confirmDismiss: (DismissDirection direction) async {
+                                          return await showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text("Delete Confirmation"),
+                                                content: const Text("Are you sure you want to delete this item?"),
+                                                actions: [
+                                                  FlatButton(
+                                                      onPressed: () => Navigator.of(context).pop(true),
+                                                      child: const Text("Delete")
+                                                  ),
+                                                  FlatButton(
+                                                    onPressed: () => Navigator.of(context).pop(false),
+                                                    child: const Text("Cancel"),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 0, right: 0),
+                                            child: Card(
+                                              child: ListTile(
+                                                title: Text(
+                                                  cubit.tasksList[index]['title'].toString(),
+                                                  maxLines: 3,
+                                                  style: const TextStyle(fontSize: 15),
+                                                ),
+                                                isThreeLine: true,
+                                                subtitle: Text(
+                                                  cubit.tasksList[index]['description'].toString(),
+                                                  maxLines: 6,
+                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                                ),
+                                              ),
+                                              color: Colors.white,
+                                              elevation: 2,
+                                              shadowColor: Colors.cyanAccent,
+                                            ),
+                                          ),
                                       ),
                                       const SizedBox(height: 5,),
                                     ],
@@ -112,7 +165,7 @@ class HomePage extends StatelessWidget {
                 _showDialog(context);
               },
               child: const Icon(Icons.add),
-              backgroundColor: Colors.deepOrange,
+              backgroundColor: Colors.deepOrangeAccent,
             ),
           );
         },
