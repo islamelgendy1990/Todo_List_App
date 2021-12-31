@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list_app/bloc/task_cubit.dart';
-import 'package:todo_list_app/models/task.dart';
 import 'package:todo_list_app/states/task_states.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+
 
 
 class HomePage extends StatelessWidget {
@@ -22,10 +25,10 @@ class HomePage extends StatelessWidget {
         listener: (BuildContext context, state){},
         builder: (BuildContext context, state){
 
-
           var cubit = TaskCubit.get(context);
 
-
+          var height= MediaQuery.of(context).size.height;
+          var width= MediaQuery.of(context).size.width;
 
           return Scaffold(
             backgroundColor: Colors.teal[400],
@@ -67,86 +70,91 @@ class HomePage extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       const SizedBox(height: 5,),
-                                      Dismissible(
-                                          key: Key(cubit.tasksList[index]['id'].toString()),
-                                          onDismissed: (direction)
-                                          {
-                                            if (direction == DismissDirection.startToEnd) {
-                                              cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
-                                            } else {
-                                              cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
-                                            }
-                                          },
-                                        background: Container(
-                                          color: Colors.red,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              children: const [
-                                                Icon(Icons.delete, color: Colors.white),
-                                                Text('Move to trash', style: TextStyle(color: Colors.white)),
-                                              ],
+                                      Slidable(
+                                        key: const ValueKey(0),
+                                        startActionPane: ActionPane(
+                                          motion: const ScrollMotion(),
+                                          children: [
+                                            SlidableAction(
+                                              onPressed: (context){
+                                                cubit.deleteFromDatabase(id: cubit.tasksList[index]['id']);
+                                              },
+                                              backgroundColor: const Color(0xFFFE4A49),
+                                              foregroundColor: Colors.white,
+                                              icon: Icons.delete,
+                                              label: 'Delete',
                                             ),
-                                          ),
+                                          ],
                                         ),
-                                        secondaryBackground: Container(
-                                          color: Colors.red,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: const [
-                                                Icon(Icons.delete, color: Colors.white),
-                                                Text('Move to trash', style: TextStyle(color: Colors.white)),
-                                              ],
+                                        endActionPane: ActionPane(
+                                          motion: const ScrollMotion(),
+                                          children: [
+                                            SlidableAction(
+                                              onPressed: (context){
+                                                cubit.updateFromDatabase(id: cubit.tasksList[index]['id'], title: cubit.titleTextController.text, description: cubit.descriptionTextController.text, date: cubit.dateController.text, time: cubit.timeController.text);
+                                                bottomSheet(context, cubit);
+                                              },
+                                              backgroundColor: const Color(0xFF21B7CA),
+                                              foregroundColor: Colors.white,
+                                              icon: Icons.edit,
+                                              label: 'Update',
                                             ),
-                                          ),
+                                          ],
                                         ),
-                                        confirmDismiss: (DismissDirection direction) async {
-                                          return await showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text("Delete Confirmation"),
-                                                content: const Text("Are you sure you want to delete this item?"),
-                                                actions: [
-                                                  FlatButton(
-                                                      onPressed: () => Navigator.of(context).pop(true),
-                                                      child: const Text("Delete")
-                                                  ),
-                                                  FlatButton(
-                                                    onPressed: () => Navigator.of(context).pop(false),
-                                                    child: const Text("Cancel"),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
                                           child: Padding(
                                             padding: const EdgeInsets.only(left: 0, right: 0),
                                             child: Card(
-                                              child: ListTile(
-                                                title: Text(
-                                                  cubit.tasksList[index]['title'].toString(),
-                                                  maxLines: 3,
-                                                  style: const TextStyle(fontSize: 15),
-                                                ),
-                                                isThreeLine: true,
-                                                subtitle: Text(
-                                                  cubit.tasksList[index]['description'].toString(),
-                                                  maxLines: 6,
-                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                              child: Container(
+                                                height:(width>height)?width/2:height/7,
+                                                width: width,
+                                                padding: const EdgeInsets.all(12),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    CircleAvatar(
+                                                        radius: 50,
+                                                        backgroundColor: Colors.teal[400],
+                                                        child: Text(cubit.tasksList[index]['time'].toString(),)),
+                                                    const SizedBox(width: 10),
+                                                    Expanded(
+                                                      child: Column(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+                                                          Text(cubit.tasksList[index]['title'].toString(),
+                                                            style: const TextStyle(
+                                                                color: Colors.black54,
+                                                                fontSize: 17,
+                                                                fontWeight: FontWeight.bold),maxLines: 1,),
+                                                          Text(cubit.tasksList[index]['description'].toString(),
+                                                            style: const TextStyle(
+                                                                color: Colors.black,
+                                                                fontSize: 17,
+                                                                fontWeight: FontWeight.bold),maxLines: 2,),
+                                                          const SizedBox(height: 10),
+                                                          Text(cubit.tasksList[index]['date'].toString(),
+                                                              style: const TextStyle(
+                                                                color: Colors.grey,
+                                                                fontSize: 14,
+                                                              )),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                               color: Colors.white,
-                                              elevation: 2,
+                                              elevation: 0,
                                               shadowColor: Colors.cyanAccent,
                                             ),
                                           ),
                                       ),
-                                      const SizedBox(height: 5,),
+                                       Divider(
+                                        color: Colors.grey[200],
+                                        endIndent: 10,
+                                        indent: 10,
+                                        thickness: 4,
+                                      ),
                                     ],
                                   ),
                                 )
@@ -161,80 +169,173 @@ class HomePage extends StatelessWidget {
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
             floatingActionButton: FloatingActionButton(
-              onPressed: (){
-                _showDialog(context);
-              },
-              child: const Icon(Icons.add),
-              backgroundColor: Colors.deepOrangeAccent,
-            ),
+               child: const Icon(Icons.add),
+               backgroundColor: Colors.deepOrangeAccent,
+              onPressed: () {
+                bottomSheet(context, cubit);
+              }
+            )
           );
         },
       ),
     );
   }
+
+
+
+
+
+
+   bottomSheet(context, cubit) {
+     var cubit = TaskCubit.get(context);
+     showModalBottomSheet(context: context, builder: (BuildContext context){
+       return Container(
+       color: Colors.lightGreen.shade50,
+         padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+           child: Form(
+             key: cubit.FromKey,
+             child: Column(
+               mainAxisSize: MainAxisSize.min,
+               children: [
+                 FloatingActionButton(
+                     child: !cubit.fIcon ? const Icon(Icons.add) : const Icon(Icons.edit),
+                     backgroundColor: Colors.deepOrangeAccent,
+                     onPressed: (){
+                  if (!cubit.fIcon) {
+                    if (cubit.FromKey.currentState!.validate()) {
+                      cubit.insertToDataBase(
+                          title: cubit.titleTextController.text,
+                          description: cubit.descriptionTextController.text,
+                          date: cubit.dateController.text,
+                          time: cubit.timeController.text);
+                      cubit.titleTextController.clear();
+                      cubit.descriptionTextController.clear();
+                      cubit.timeController.clear();
+                      cubit.dateController.clear();
+                      Navigator.pop(context);
+                    } else {
+                      cubit.scaffoldKey.currentState!
+                          .showBottomSheet<dynamic>(
+                              (context) => bottomSheet(context, cubit))
+                          .closed
+                          .then((value) => cubit.changeIcon());
+                      cubit.changeIcon();
+                   }
+                    }
+                     }
+                 ),
+                 const SizedBox(height: 8),
+                 TextFormField(
+                   inputFormatters: [
+                     LengthLimitingTextInputFormatter(55),
+                   ],
+                   controller: cubit.titleTextController,
+                   keyboardType: TextInputType.text,
+                   decoration: InputDecoration(
+                       prefixIcon: const Icon(Icons.short_text),
+                       labelText: "Task title",
+                       border: OutlineInputBorder(
+                           borderSide: const BorderSide(color: Colors.lightGreen),
+                           borderRadius: BorderRadius.circular(5),
+                           gapPadding: 5)),
+                   validator: (value) {
+                     if (value == null || value.isEmpty) {
+                       return 'Please enter enter some title';
+                     }
+                     return null;
+                   },
+                 ),
+                 const SizedBox(height: 8),
+                 TextFormField(
+                   inputFormatters: [
+                     LengthLimitingTextInputFormatter(55),
+                   ],
+                   controller: cubit.descriptionTextController,
+                   keyboardType: TextInputType.text,
+                   decoration: InputDecoration(
+                       prefixIcon: const Icon(Icons.short_text),
+                       labelText: "Task description",
+                       border: OutlineInputBorder(
+                           borderSide: const BorderSide(color: Colors.lightGreen),
+                           borderRadius: BorderRadius.circular(5),
+                           gapPadding: 5)),
+                   validator: (value) {
+                     if (value == null || value.isEmpty) {
+                       return 'Please enter some description';
+                     }
+                     return null;
+                   },
+                 ),
+                 const SizedBox(height: 8),
+                 TextFormField(
+                   onTap: () {
+                     showDatePicker(
+                         context: context,
+                         initialDate: DateTime.now(),
+                         firstDate: DateTime.now(),
+                         lastDate: DateTime.parse('2022-05-01'))
+                         .then((value) => cubit.dateController.text =
+                         DateFormat.yMMMEd().format(value!).toString());
+                   },
+                   controller: cubit.dateController,
+                   keyboardType: TextInputType.datetime,
+                   validator: (value) {
+                     if (value == null || value.isEmpty) {
+                       return 'Please enter Your Task date';
+                     }
+                     return null;
+                   },
+                   decoration: InputDecoration(
+                       prefixIcon: const Icon(Icons.calendar_today),
+                       labelText: "Task date",
+                       border: OutlineInputBorder(
+                           borderSide: const BorderSide(color: Colors.lightGreen),
+                           borderRadius: BorderRadius.circular(5),
+                           gapPadding: 5)),
+                 ),
+                 const SizedBox(height: 8),
+                 TextFormField(
+                   onTap: () {
+                     showTimePicker(context: context, initialTime: TimeOfDay.now())
+                         .then((value) => cubit.timeController.text =
+                         value!.format(context).toString());
+                   },
+                   controller: cubit.timeController,
+                   keyboardType: TextInputType.datetime,
+                   validator: (value) {
+                     if (value == null || value.isEmpty) {
+                       return 'Enter Your Task time';
+                     }
+                     return null;
+                   },
+                   decoration: InputDecoration(
+                       prefixIcon: const Icon(Icons.watch),
+                       labelText: "Task time",
+                       border: OutlineInputBorder(
+                           borderSide: const BorderSide(color: Colors.lightGreen),
+                           borderRadius: BorderRadius.circular(5),
+                           gapPadding: 5)),
+                 )
+               ],
+             ),
+           ),
+       );
+
+     });
+  }
+
+
+
+
+
+
 }
 
 
 
- void _showDialog(BuildContext context) {
-
-  var cubit = TaskCubit.get(context);
 
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title:  const Text("Add Tasks"),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: TextField(
-              controller: cubit.titleTextController,
-              decoration: const InputDecoration(
-                  labelText: "Add title Tasks",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8))
-                  )
-              ),
-            ),
-          ),
-          const SizedBox(height: 10,),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: TextField(
-              controller: cubit.descriptionTextController,
-              decoration: const InputDecoration(
-                  labelText: "Add description Tasks",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8))
-                  )
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              MaterialButton(
-                child: const Text("Add", style: TextStyle(color: Colors.blue),),
-                onPressed: () {
-                  cubit.insertToDataBase(title: cubit.titleTextController.text, description: cubit.descriptionTextController.text);
-                 // cubit.getDataFromDatabase(cubit.database);
-                  cubit.titleTextController.clear();
-                  cubit.descriptionTextController.clear();
-                  Navigator.pop(context);
-                },
-              ),
-              MaterialButton(
-                child: const Text("Cancel", style: TextStyle(color: Colors.red),),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-    barrierDismissible: false,
-  );
-}
+
+
+
+

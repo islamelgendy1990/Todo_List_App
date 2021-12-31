@@ -14,6 +14,10 @@
 
    class DeleteDatabaseStates extends TaskStates {}
 
+   class UpdateDatabaseStates extends TaskStates {}
+
+   class ChangeIconBottomSheet extends TaskStates {}
+
 
 
 

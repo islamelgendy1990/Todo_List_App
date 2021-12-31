@@ -38,6 +38,8 @@ dependencies:
   bloc: ^8.0.1
   sqflite: ^2.0.0-nullsafety.2
   path: ^1.8.0
+  intl: ^0.17.0
+  flutter_slidable: ^1.2.0
 
 dev_dependencies:
   flutter_test:
