@@ -114,7 +114,8 @@ class HomePage extends StatelessWidget {
                                                     CircleAvatar(
                                                         radius: 50,
                                                         backgroundColor: Colors.teal[400],
-                                                        child: Text(cubit.tasksList[index]['time'].toString(),)),
+                                                        child: Text(cubit.tasksList[index]['time'].toString(),
+                                                          style: const TextStyle(color: Colors.white),)),
                                                     const SizedBox(width: 10),
                                                     Expanded(
                                                       child: Column(
@@ -188,10 +189,14 @@ class HomePage extends StatelessWidget {
 
    bottomSheet(context, cubit) {
      var cubit = TaskCubit.get(context);
-     showModalBottomSheet(context: context, builder: (BuildContext context){
-       return Container(
-       color: Colors.lightGreen.shade50,
-         padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+     showModalBottomSheet(isScrollControlled: true,context: context, builder: (BuildContext context){
+       return SingleChildScrollView(
+         child: Container(
+           color: Colors.lightGreen.shade50,
+           padding: EdgeInsets.only(
+             left: 20, right: 20,
+             bottom: MediaQuery.of(context).viewInsets.bottom,
+           ),
            child: Form(
              key: cubit.FromKey,
              child: Column(
@@ -201,27 +206,27 @@ class HomePage extends StatelessWidget {
                      child: !cubit.fIcon ? const Icon(Icons.add) : const Icon(Icons.edit),
                      backgroundColor: Colors.deepOrangeAccent,
                      onPressed: (){
-                  if (!cubit.fIcon) {
-                    if (cubit.FromKey.currentState!.validate()) {
-                      cubit.insertToDataBase(
-                          title: cubit.titleTextController.text,
-                          description: cubit.descriptionTextController.text,
-                          date: cubit.dateController.text,
-                          time: cubit.timeController.text);
-                      cubit.titleTextController.clear();
-                      cubit.descriptionTextController.clear();
-                      cubit.timeController.clear();
-                      cubit.dateController.clear();
-                      Navigator.pop(context);
-                    } else {
-                      cubit.scaffoldKey.currentState!
-                          .showBottomSheet<dynamic>(
-                              (context) => bottomSheet(context, cubit))
-                          .closed
-                          .then((value) => cubit.changeIcon());
-                      cubit.changeIcon();
-                   }
-                    }
+                       if (!cubit.fIcon) {
+                         if (cubit.FromKey.currentState!.validate()) {
+                           cubit.insertToDataBase(
+                               title: cubit.titleTextController.text,
+                               description: cubit.descriptionTextController.text,
+                               date: cubit.dateController.text,
+                               time: cubit.timeController.text);
+                           cubit.titleTextController.clear();
+                           cubit.descriptionTextController.clear();
+                           cubit.timeController.clear();
+                           cubit.dateController.clear();
+                           Navigator.pop(context);
+                         } else {
+                           cubit.scaffoldKey.currentState!
+                               .showBottomSheet<dynamic>(
+                                   (context) => bottomSheet(context, cubit))
+                               .closed
+                               .then((value) => cubit.changeIcon());
+                           cubit.changeIcon();
+                         }
+                       }
                      }
                  ),
                  const SizedBox(height: 8),
@@ -315,12 +320,13 @@ class HomePage extends StatelessWidget {
                            borderSide: const BorderSide(color: Colors.lightGreen),
                            borderRadius: BorderRadius.circular(5),
                            gapPadding: 5)),
-                 )
+                 ),
+                 const SizedBox(height: 15),
                ],
              ),
            ),
+         ),
        );
-
      });
   }
 
